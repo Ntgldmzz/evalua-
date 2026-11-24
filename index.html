@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Examen Integral</title>
+  <style>
+    :root { --primario: #1b6b5a; --fondo: #f4f6f5; --texto: #1f2937; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--fondo); color: var(--texto); display: flex; justify-content: center; padding: 20px; margin: 0; }
+    .card { background: white; max-width: 480px; width: 100%; border-radius: 20px; padding: 30px 24px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); text-align: center; }
+    .icono { background: #e6f2ef; color: var(--primario); width: 56px; height: 56px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-size: 28px; }
+    h1 { margin: 0 0 8px; font-size: 26px; }
+    .subtitulo { color: var(--primario); font-weight: 600; margin-bottom: 16px; }
+    .desc { color: #4b5563; font-size: 15px; line-height: 1.5; margin-bottom: 20px; }
+    ul { text-align: left; color: #374151; font-size: 14px; padding-left: 20px; margin-bottom: 24px; }
+    li { margin-bottom: 10px; }
+    li::marker { color: var(--primario); }
+    .btn { background: var(--primario); color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px; }
+    .btn:hover { opacity: 0.92; }
+    .opcion { display: block; width: 100%; text-align: left; background: #f9fafb; border: 1px solid #e5e7eb; padding: 14px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; font-size: 15px; }
+    .opcion:hover { background: #e6f2ef; border-color: var(--primario); }
+    .oculto { display: none; }
+    .meta { font-size: 12px; color: #6b7280; margin-top: 16px; }
+    .materias-box { text-align: left; background: #f9fafb; padding: 14px; border-radius: 12px; margin-top: 16px; font-size: 13px; color: #4b5563; }
+  </style>
+</head>
+<body>
+
+<div class="card" id="pantalla-inicio">
+  <div class="icono">🩺</div>
+  <h1>Examen Integral</h1>
+  <div class="subtitulo">Plataforma de evaluación universitaria</div>
+  <p class="desc">Evalúa tus conocimientos con exámenes generados de forma aleatoria a partir de tus materias de estudio.</p>
+  <ul>
+    <li>Cada examen contiene <strong>100 preguntas</strong> seleccionadas de forma aleatoria</li>
+    <li>Las preguntas y el orden de las opciones se mezclan en cada intento</li>
+    <li>Calificación final calculada sobre <strong>10 puntos</strong></li>
+  </ul>
+  <button class="btn" onclick="iniciarExamen()">INICIAR EXAMEN</button>
+  <div class="materias-box" id="lista-materias"></div>
+  <div class="meta" id="info-banco"></div>
+</div>
+
+<div class="card oculto" id="pantalla-quiz">
+  <div class="subtitulo" id="progreso">Pregunta 1 de 100</div>
+  <h2 id="texto-pregunta" style="font-size: 18px; text-align: left; margin-bottom: 20px;"></h2>
+  <div id="contenedor-opciones"></div>
+</div>
+
+<div class="card oculto" id="pantalla-resultado">
+  <div class="icono">🎯</div>
+  <h1>Resultado Final</h1>
+  <div class="subtitulo" id="nota-final" style="font-size: 32px; margin: 16px 0;"></div>
+  <p class="desc" id="detalle-resultado"></p>
+  <button class="btn" onclick="location.reload()">HACER OTRO INTENTO (100 NUEVAS)</button>
+</div>
+
+<script>
+  const bancoPreguntas = [
+
+{ materia: "Química Clínica", pregunta: "¿Qué acción se indica en el inserto de SPINREACT para el método de colesterol (CHOD-POD) cuando la concentración de la muestra supera el límite de linealidad de 750 mg/dL?", correcta: "Diluir 1/2 con CINa 9 g/L y multiplicar el resultado final por 2", opciones: ["Diluir 1/2 con CINa 9 g/L y multiplicar el resultado final por 2", "Diluir 1/10 con agua destilada y dividir el resultado final entre 2", "Incubar 30 minutos a 37 °C y multiplicar por 0.0058", "Reconstituir el reactivo R2 en tampón TRIS y multiplicar por 4"] },
+{ materia: "Química Clínica", pregunta: "¿Cuál es el rango de linealidad o límite superior de linealidad indicado para Glucosa (GOD-POD), Ácido Úrico (Uricasa-POD), Triglicéridos (GPO-POD) y Creatinina (Jaffe cinético) en los insertos SPINREACT del documento?", correcta: "Glucosa: 500 mg/dL; Ácido úrico: 25 mg/dL; Triglicéridos: 1200 mg/dL; Creatinina: 15 mg/dL", opciones: ["Glucosa: 500 mg/dL; Ácido úrico: 25 mg/dL; Triglicéridos: 1200 mg/dL; Creatinina: 15 mg/dL", "Glucosa: 1200 mg/dL; Ácido úrico: 500 mg/dL; Triglicéridos: 15 mg/dL; Creatinina: 25 mg/dL", "Glucosa: 250 mg/dL; Ácido úrico: 100 mg/dL; Triglicéridos: 500 mg/dL; Creatinina: 50 mg/dL", "Glucosa: 750 mg/dL; Ácido úrico: 15 mg/dL; Triglicéridos: 250 mg/dL; Creatinina: 100 mg/dL"] },
+{ materia: "Química Clínica", pregunta: "¿Cuál es la dilución y el factor multiplicador indicados en el inserto de GOT(AST) NADH cinético UV cuando la concentración supera el límite de linealidad de 260 U/L?", correcta: "Diluir 1/10 con CINa 9 g/L y multiplicar el resultado final por 10", opciones: ["Diluir 1/10 con CINa 9 g/L y multiplicar el resultado final por 10", "Diluir 1/2 con CINa 9 g/L y multiplicar el resultado final por 2", "Diluir 1/5 con agua destilada y multiplicar el resultado final por 5", "Diluir 1/20 con buffer pH 7.4 y multiplicar el resultado final por 20"] },
+{ materia: "Química Clínica", pregunta: "En el Reto Interactivo 01 de diluciones, al diluir 2,000 uL de suero en una relación 1:10, ¿cuántas partes de solvente y qué volumen total en uL se obtienen?", correcta: "1 parte de soluto (2,000 uL) + 9 partes de solvente (18,000 uL) = 10 partes de volumen total (20,000 uL)", opciones: ["1 parte de soluto (2,000 uL) + 9 partes de solvente (18,000 uL) = 10 partes de volumen total (20,000 uL)", "1 parte de soluto (2,000 uL) + 10 partes de solvente (20,000 uL) = 11 partes de volumen total (22,000 uL)", "2 partes de soluto (2,000 uL) + 8 partes de solvente (8,000 uL) = 10 partes de volumen total (10,000 uL)", "1 parte de soluto (2,000 uL) + 5 partes de solvente (10,000 uL) = 6 partes de volumen total (12,000 uL)"] },
+{ materia: "Química Clínica", pregunta: "En el Reto Interactivo 02, si una dilución 1:2 de suero con solución salina da un resultado en el equipo de 8.6 mg/dL de creatinina sérica, ¿cuál es la concentración real?", correcta: "17.2 mg/dL", opciones: ["17.2 mg/dL", "4.3 mg/dL", "8.6 mg/dL", "25.8 mg/dL"] },
+{ materia: "Química Clínica", pregunta: "Según la fórmula y resolución del Reto Interactivo 03, ¿cuál es el factor de dilución (FD) de una solución preparada con 2 mL de suero, 6 mL de solución salina y 12 mL de cloruro de sodio?", correcta: "FD = 10 (relación 1:10), calculado como Volumen Total (20 mL) / Volumen de Soluto (2 mL)", opciones: ["FD = 10 (relación 1:10), calculado como Volumen Total (20 mL) / Volumen de Soluto (2 mL)", "FD = 3 (relación 1:3), calculado como Volumen Total (20 mL) / Solvente 1 (6 mL)", "FD = 20 (relación 1:20), calculado como Volumen de Soluto (2 mL) x 10", "FD = 6 (relación 1:6), calculado como Volumen Total (18 mL) / Volumen de Soluto (3 mL)"] },
+{ materia: "Química Clínica", pregunta: "¿Qué representa la prueba de hemoglobina glucosilada (HbA1c) y qué promedio de días indica en la diapositiva de línea de tiempo metabólica?", correcta: "Representa un promedio de los valores de azúcar en la sangre durante los últimos 120 días (últimos 4 meses)", opciones: ["Representa un promedio de los valores de azúcar en la sangre durante los últimos 120 días (últimos 4 meses)", "Representa un promedio de la glucemia en ayuno de las últimas 24 horas", "Representa la reserva de glucógeno hepático acumulada en los últimos 7 días", "Representa la respuesta aguda a la insulina durante los últimos 30 minutos"] },
+{ materia: "Química Clínica", pregunta: "¿Qué acciones opuestas realizan la insulina y el glucagón en el ciclo de la glucosa según la presentación?", correcta: "La insulina baja la glucosa en sangre estimulando la formación de glucógeno (glucosa a glucógeno); el glucagón sube la glucosa estimulando la degradación de glucógeno (glucógeno a glucosa)", opciones: ["La insulina baja la glucosa en sangre estimulando la formación de glucógeno (glucosa a glucógeno); el glucagón sube la glucosa estimulando la degradación de glucógeno (glucógeno a glucosa)", "La insulina sube la glucosa degradando glucógeno; el glucagón baja la glucosa formando glucógeno", "Ambas hormonas estimulan la glucogenólisis hepática durante el ayuno prolongado", "La insulina actúa solo en el hígado y el glucagón solo en los canales de glucosa musculares"] },
+{ materia: "Química Clínica", pregunta: "¿Cómo distingue la presentación entre diabetes mellitus tipo 1 y diabetes mellitus tipo 2?", correcta: "Diabetes tipo 1: fallo en la producción pancreática de insulina; diabetes tipo 2: las células no responden apropiadamente a la insulina (resistencia)", opciones: ["Diabetes tipo 1: fallo en la producción pancreática de insulina; diabetes tipo 2: las células no responden apropiadamente a la insulina (resistencia)", "Diabetes tipo 1: resistencia celular a la insulina; diabetes tipo 2: ausencia congénita de receptores de glucagón", "Diabetes tipo 1: hiperproducción autónoma de insulina por el páncreas; diabetes tipo 2: hipoglucemia crónica en ayuno", "Ambas consisten únicamente en exceso de glucagón sin alteración de la insulina"] },
+{ materia: "Química Clínica", pregunta: "¿Cuáles de las siguientes condiciones se listan en el diagnóstico diferencial como causas de hiperglucemia y cuáles como causas de hipoglucemia?", correcta: "Hiperglucemia: estrés agudo, síndrome de Cushing, insuficiencia renal crónica, glucagonoma, pancreatitis aguda y acromegalia; hipoglucemia: sobredosis de insulina, insulinoma, hipotiroidismo, enfermedad hepática extensa e inanición", opciones: ["Hiperglucemia: estrés agudo, síndrome de Cushing, insuficiencia renal crónica, glucagonoma, pancreatitis aguda y acromegalia; hipoglucemia: sobredosis de insulina, insulinoma, hipotiroidismo, enfermedad hepática extensa e inanición", "Hiperglucemia: sobredosis de insulina, insulinoma e inanición; hipoglucemia: síndrome de Cushing, glucagonoma y acromegalia", "Hiperglucemia: hipotiroidismo y enfermedad hepática extensa; hipoglucemia: pancreatitis aguda y estrés agudo", "Todas estas condiciones producen exclusivamente hipoglucemia severa"] },
+{ materia: "Química Clínica", pregunta: "¿Qué porcentajes de la dieta equilibrada y qué tipos de lípidos se ilustran en la diapositiva de metabolismo de los lípidos?", correcta: "Representan el 35% de una dieta equilibrada: 90% triglicéridos y 10% fosfolípidos, colesterol y vitaminas liposolubles", opciones: ["Representan el 35% de una dieta equilibrada: 90% triglicéridos y 10% fosfolípidos, colesterol y vitaminas liposolubles", "Representan el 10% de una dieta equilibrada: 90% colesterol y 10% triglicéridos", "Representan el 60% de una dieta equilibrada: 50% triglicéridos y 50% ácidos grasos libres", "Representan el 20% de una dieta equilibrada: 90% vitaminas liposolubles y 10% triglicéridos"] },
+{ materia: "Química Clínica", pregunta: "¿Qué función cumple la lipasa lingual, la lipasa gástrica, las sales biliares y la lipasa pancreática en el viaje de la digestión lipídica?", correcta: "Lipasa lingual: triglicéridos y ácidos grasos de cadena corta; lipasa gástrica: triglicéridos y ácidos grasos de cadena media; duodeno: sales biliares emulsionan y lipasa pancreática actúa sobre lípidos de cadena larga", opciones: ["Lipasa lingual: triglicéridos y ácidos grasos de cadena corta; lipasa gástrica: triglicéridos y ácidos grasos de cadena media; duodeno: sales biliares emulsionan y lipasa pancreática actúa sobre lípidos de cadena larga", "Lipasa lingual: lípidos de cadena larga; lipasa gástrica: colesterol esterificado; sales biliares: hidrolizan proteínas", "Lipasa pancreática: cadena corta en la boca; lipasa lingual: cadena larga en el estómago", "Sales biliares: degradan glucógeno; lipasa gástrica: emulsifica en el colon"] },
+{ materia: "Química Clínica", pregunta: "¿Qué describe la presentación sobre el quilomicrón y el quilomicrón remanente tras la resíntesis lipídica en el enterocito?", correcta: "El quilomicrón transporta lípidos exógenos de la resíntesis hacia músculo y tejido adiposo, y el quilomicrón remanente viaja al hígado y se transforma en colesterol", opciones: ["El quilomicrón transporta lípidos exógenos de la resíntesis hacia músculo y tejido adiposo, y el quilomicrón remanente viaja al hígado y se transforma en colesterol", "El quilomicrón transporta colesterol endógeno desde el hígado hacia el enterocito y se excreta por la orina", "El quilomicrón remanente se deposita en los enterocitos sin pasar por el hígado", "El quilomicrón solo transporta glucosa y aminoácidos a las células beta pancreáticas"] },
+{ materia: "Química Clínica", pregunta: "¿Qué funciones se describen para VLDL, IDL, LDL y HDL en la diapositiva de flota de transporte endógeno?", correcta: "VLDL: grasa del hígado al tejido adiposo; IDL: restos de VLDL; LDL: colesterol del hígado a todas las células del cuerpo; HDL: producido por hígado (30%) e intestino (70%), degrada triglicéridos del quilomicrón y lleva grasas al hígado para metabolizarlas", opciones: ["VLDL: grasa del hígado al tejido adiposo; IDL: restos de VLDL; LDL: colesterol del hígado a todas las células del cuerpo; HDL: producido por hígado (30%) e intestino (70%), degrada triglicéridos del quilomicrón y lleva grasas al hígado para metabolizarlas", "LDL: producido en el intestino (70%) para llevar grasas al hígado; HDL: lleva colesterol del hígado a las arterias coronarias", "VLDL: restos de LDL; IDL: producido en el hígado (30%) para degradar glucógeno", "HDL: transporta triglicéridos del tejido adiposo al músculo esquelético"] },
+{ materia: "Química Clínica", pregunta: "¿Cuáles son los valores de referencia y el valor crítico de triglicéridos indicados en la diapositiva de triglicéridos?", correcta: "Mujeres: 35 a 135 mg/dL; hombres (adultos): 40 a 160 mg/dL; valor crítico: > 400 mg/dL", opciones: ["Mujeres: 35 a 135 mg/dL; hombres (adultos): 40 a 160 mg/dL; valor crítico: > 400 mg/dL", "Mujeres: 100 a 200 mg/dL; hombres (adultos): 150 a 250 mg/dL; valor crítico: > 150 mg/dL", "Mujeres: 10 a 50 mg/dL; hombres (adultos): 20 a 60 mg/dL; valor crítico: > 100 mg/dL", "Mujeres: 200 a 239 mg/dL; hombres (adultos): >= 240 mg/dL; valor crítico: > 1200 mg/dL"] },
+{ materia: "Química Clínica", pregunta: "¿Qué fármacos se mencionan en la diapositiva de triglicéridos como aquellos que AUMENTAN y cuáles como aquellos que DISMINUYEN los triglicéridos?", correcta: "Aumentan: colestiramina, estrógenos, anticonceptivos orales; disminuyen: ácido ascórbico, asparaginasa, clofibrato, colestipol, fibratos, estatinas", opciones: ["Aumentan: colestiramina, estrógenos, anticonceptivos orales; disminuyen: ácido ascórbico, asparaginasa, clofibrato, colestipol, fibratos, estatinas", "Aumentan: fibratos, estatinas y ácido ascórbico; disminuyen: estrógenos y anticonceptivos orales", "Aumentan: insulina y metformina; disminuyen: alcohol y comidas grasosas", "No se mencionan fármacos que aumenten ni disminuyan los triglicéridos"] },
+{ materia: "Química Clínica", pregunta: "En el dashboard clínico integrado del paciente José Armando Méndez (49 años), ¿qué resultados de laboratorio figuran?", correcta: "Glucosa ayuno 238 mg/dL, HbA1c 9.2%, colesterol total 285 mg/dL, HDL 34 mg/dL, LDL 165 mg/dL, TG 540 mg/dL y microalbuminuria 50 mg/L", opciones: ["Glucosa ayuno 238 mg/dL, HbA1c 9.2%, colesterol total 285 mg/dL, HDL 34 mg/dL, LDL 165 mg/dL, TG 540 mg/dL y microalbuminuria 50 mg/L", "Glucosa ayuno 85 mg/dL, HbA1c 4.8%, colesterol total 160 mg/dL, HDL 65 mg/dL, LDL 80 mg/dL, TG 90 mg/dL y microalbuminuria 5 mg/L", "Glucosa ayuno 110 mg/dL, HbA1c 5.5%, colesterol total 190 mg/dL, HDL 50 mg/dL, LDL 100 mg/dL, TG 120 mg/dL", "Glucosa ayuno 45 mg/dL, HbA1c 3.9%, colesterol total 110 mg/dL, HDL 20 mg/dL, LDL 50 mg/dL, TG 40 mg/dL"] },
+{ materia: "Química Clínica", pregunta: "¿De qué es producto final el ácido úrico y cuáles son los porcentajes de excreción renal y fecal mostrados en la ruta metabólica?", correcta: "Producto final del catabolismo de las purinas; 75% eliminación renal (orina) y 25% eliminación fecal", opciones: ["Producto final del catabolismo de las purinas; 75% eliminación renal (orina) y 25% eliminación fecal", "Producto final del catabolismo de las pirimidinas; 25% eliminación renal y 75% eliminación fecal", "Producto intermedio de la glucólisis; 50% eliminación renal y 50% eliminación respiratoria", "Producto final del catabolismo de ácidos grasos de cadena corta; 90% eliminación biliar y 10% renal"] },
+{ materia: "Química Clínica", pregunta: "¿Cuáles son las cuatro funciones protectoras del ácido úrico descritas en la diapositiva de la paradoja del ácido úrico?", correcta: "Quelante de metales pesados (Fe, Cu, Hg), protección frente a lípidos (previene oxidación de ácidos grasos), captador de radicales libres y combate la hipercalcemia formando urato cálcico", opciones: ["Quelante de metales pesados (Fe, Cu, Hg), protección frente a lípidos (previene oxidación de ácidos grasos), captador de radicales libres y combate la hipercalcemia formando urato cálcico", "Transporte de oxígeno en eritrocitos, síntesis de insulina, coagulación sanguínea y producción de bilis", "Reabsorción de glucosa en el túbulo proximal, estimulación de la eritropoyesis, regulación del pH gástrico y secreción de catecolaminas", "Digestión de proteínas en el estómago, emulsificación de lípidos en el duodeno, formación de glucógeno y síntesis de hormonas tiroideas"] },
+{ materia: "Química Clínica", pregunta: "¿Qué alimentos pertenecen al nivel rojo (evitar, 100-1000 mg) y cuáles al nivel verde (consumo diario, insignificante) en el semáforo dietético de purinas?", correcta: "Nivel rojo: pescados y mariscos (anchoas, sardinas), vísceras (hígado, riñón), fiambres/embutidos, extractos de carne, levadura de cerveza y alcohol; nivel verde: lácteos (yogur, queso), huevos, cereales (arroz, pan, pasta), frutas, aceites y café/té", opciones: ["Nivel rojo: pescados y mariscos (anchoas, sardinas), vísceras (hígado, riñón), fiambres/embutidos, extractos de carne, levadura de cerveza y alcohol; nivel verde: lácteos (yogur, queso), huevos, cereales (arroz, pan, pasta), frutas, aceites y café/té", "Nivel rojo: lácteos, huevos, cereales, frutas y café/té; nivel verde: vísceras, mariscos, embutidos y alcohol", "Nivel rojo: verduras (espinaca, brócoli) y legumbres; nivel verde: carnes rojas, sardinas y levadura de cerveza", "Nivel rojo: agua, aceites y frutas; nivel verde: extractos de carne y cerveza"] },
+{ materia: "Química Clínica", pregunta: "¿Cuáles son las cuatro etapas de progresión clínica de la enfermedad de la gota presentadas en el documento?", correcta: "Etapa 1: hiperuricemia; etapa 2: gota aguda; etapa 3: gota intercrítica; etapa 4: gota crónica (formación de tofos)", opciones: ["Etapa 1: hiperuricemia; etapa 2: gota aguda; etapa 3: gota intercrítica; etapa 4: gota crónica (formación de tofos)", "Etapa 1: gota crónica con tofos; etapa 2: gota intercrítica; etapa 3: hiperuricemia; etapa 4: gota aguda", "Etapa 1: hipouricemia; etapa 2: litiasis cálcica; etapa 3: rabdomiólisis; etapa 4: insuficiencia hepática", "Etapa 1: hipercalcemia; etapa 2: acidosis láctica; etapa 3: cetosis; etapa 4: anemia perniciosa"] },
+{ materia: "Química Clínica", pregunta: "¿Qué causas de concentraciones aumentadas y disminuidas de ácido úrico se listan en el panel diagnóstico?", correcta: "Aumentadas: exceso de purinas en dieta, defectos congénitos (ligado a X, deficiencia enzimática de RNA/DNA), lisis celular (cáncer metastásico, mieloma, leucemia, quimioterapia, hemólisis) y daño muscular (rabdomiólisis); disminuidas: idiopática, falla de síntesis (atrofia grasa/insuficiencia hepática grave) y excreción comprometida (enfermedad renal crónica, acidosis)", opciones: ["Aumentadas: exceso de purinas en dieta, defectos congénitos (ligado a X, deficiencia enzimática de RNA/DNA), lisis celular (cáncer metastásico, mieloma, leucemia, quimioterapia, hemólisis) y daño muscular (rabdomiólisis); disminuidas: idiopática, falla de síntesis (atrofia grasa/insuficiencia hepática grave) y excreción comprometida (enfermedad renal crónica, acidosis)", "Aumentadas: atrofia grasa hepática e hipotiroidismo; disminuidas: dieta alta en purinas, leucemia y quimioterapia", "Aumentadas: inanición y malabsorción; disminuidas: rabdomiólisis y gota aguda", "Todas las condiciones listadas solo disminuyen el ácido úrico"] },
+{ materia: "Química Clínica", pregunta: "¿Qué protocolo de laboratorio, muestra, interferencias y alerta crítica se indican para la creatinina sérica en la presentación?", correcta: "No requiere ayuno; sangre venosa (tubo tapón rojo); interferencias: dieta muy alta en carne (elevación transitoria) y fármacos nefrotóxicos (cisplatino, cefalosporinas); alerta crítica: > 4 mg/dL", opciones: ["No requiere ayuno; sangre venosa (tubo tapón rojo); interferencias: dieta muy alta en carne (elevación transitoria) y fármacos nefrotóxicos (cisplatino, cefalosporinas); alerta crítica: > 4 mg/dL", "Requiere 24 horas de ayuno absoluto; orina de 24 horas en frasco ámbar; alerta crítica: > 0.5 mg/dL", "Requiere sangre arterial heparinizada; no presenta interferencias dietéticas ni farmacológicas; alerta crítica: < 1.0 mg/dL", "Requiere ayuno de 12 horas; suero refrigerado a -70 °C; alerta crítica: > 15 mg/dL"] },
+{ materia: "Química Clínica", pregunta: "¿Cómo compara la presentación la creatinina frente al nitrógeno ureico (BUN) en la evaluación renal?", correcta: "Creatinina: dependencia hepática mínima, velocidad de elevación tardía (sugiere cronicidad) y baja sensibilidad a factores externos; BUN: dependencia hepática alta, velocidad de elevación rápida y alta sensibilidad a deshidratación, diuréticos, sangrado digestivo y dietas hiperproteicas", opciones: ["Creatinina: dependencia hepática mínima, velocidad de elevación tardía (sugiere cronicidad) y baja sensibilidad a factores externos; BUN: dependencia hepática alta, velocidad de elevación rápida y alta sensibilidad a deshidratación, diuréticos, sangrado digestivo y dietas hiperproteicas", "Creatinina: dependencia hepática alta y elevación rápida; BUN: dependencia hepática mínima y elevación tardía", "Ambas tienen idéntica dependencia hepática y la misma sensibilidad a factores externos", "El BUN es más estable y no se altera por deshidratación ni diuréticos"] },
+{ materia: "Química Clínica", pregunta: "En la resolución del caso clínico del varón de 52 años con ácido úrico de 9.8 mg/dL, creatinina de 1.4 mg/dL, BUN de 22 mg/dL y uso de diuréticos tiazídicos, ¿qué relación explican los diuréticos y qué intervención se señala?", correcta: "Los diuréticos tiazídicos causan depleción de volumen y compiten con el ácido úrico en la excreción tubular renal acumulándolo en sangre; se indica suspender temporalmente alcohol y vísceras, limitar carnes rojas y evaluar cambio de antihipertensivo (retirar tiazida)", opciones: ["Los diuréticos tiazídicos causan depleción de volumen y compiten con el ácido úrico en la excreción tubular renal acumulándolo en sangre; se indica suspender temporalmente alcohol y vísceras, limitar carnes rojas y evaluar cambio de antihipertensivo (retirar tiazida)", "Los diuréticos tiazídicos aumentan la filtración glomerular de purinas y reducen el ácido úrico; se indica aumentar el consumo de mariscos y alcohol", "Los diuréticos tiazídicos destruyen los cristales de urato en las articulaciones; no se requiere modificar la dieta ni el antihipertensivo", "Los diuréticos tiazídicos actúan solo en el hígado bloqueando la síntesis de urea sin afectar el ácido úrico"] },
+
+  ];
+
+  const CANTIDAD_PREGUNTAS = 100;
+  let preguntasExamen = [];
+  let indiceActual = 0;
+  let aciertos = 0;
+
+  // Mostrar resumen de materias y total automáticamente
+  const conteoMaterias = {};
+  bancoPreguntas.forEach(p => {
+    conteoMaterias[p.materia] = (conteoMaterias[p.materia] || 0) + 1;
+  });
+  let htmlMaterias = "<strong>Materias incluidas:</strong><ul style='margin: 8px 0 0; padding-left: 18px;'>";
+  for (const [mat, cant] of Object.entries(conteoMaterias)) {
+    htmlMaterias += `<li style='margin-bottom: 4px;'>${mat} (${cant} preguntas)</li>`;
+  }
+  htmlMaterias += "</ul>";
+  document.getElementById("lista-materias").innerHTML = htmlMaterias;
+  document.getElementById("info-banco").innerText = `Banco total disponible: ${bancoPreguntas.length} preguntas.`;
+
+  function mezclar(array) {
+    return array.sort(() => Math.random() - 0.5);
+  }
+
+  function iniciarExamen() {
+    const total = Math.min(CANTIDAD_PREGUNTAS, bancoPreguntas.length);
+    preguntasExamen = mezclar([...bancoPreguntas]).slice(0, total);
+    document.getElementById("pantalla-inicio").classList.add("oculto");
+    document.getElementById("pantalla-quiz").classList.remove("oculto");
+    mostrarPregunta();
+  }
+
+  function mostrarPregunta() {
+    const actual = preguntasExamen[indiceActual];
+    document.getElementById("progreso").innerText = `${actual.materia} • Pregunta ${indiceActual + 1} de ${preguntasExamen.length}`;
+    document.getElementById("texto-pregunta").innerText = actual.pregunta;
+    
+    const contenedor = document.getElementById("contenedor-opciones");
+    contenedor.innerHTML = "";
+    
+    mezclar([...actual.opciones]).forEach(opcion => {
+      const btn = document.createElement("button");
+      btn.className = "opcion";
+      btn.innerText = opcion;
+      btn.onclick = () => verificarRespuesta(opcion, actual.correcta);
+      contenedor.appendChild(btn);
+    });
+  }
+
+  function verificarRespuesta(seleccionada, correcta) {
+    if (seleccionada === correcta) aciertos++;
+    indiceActual++;
+    if (indiceActual < preguntasExamen.length) {
+      mostrarPregunta();
+    } else {
+      mostrarResultado();
+    }
+  }
+
+  function mostrarResultado() {
+    document.getElementById("pantalla-quiz").classList.add("oculto");
+    document.getElementById("pantalla-resultado").classList.remove("oculto");
+    const nota = ((aciertos / preguntasExamen.length) * 10).toFixed(1);
+    document.getElementById("nota-final").innerText = `${nota} / 10`;
+    document.getElementById("detalle-resultado").innerText = `Respondiste correctamente ${aciertos} de ${preguntasExamen.length} preguntas.`;
+  }
+</script>
+</body>
+</html>
