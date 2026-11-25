@@ -17,7 +17,7 @@
     li::marker { color: var(--primario); }
     .btn { background: var(--primario); color: white; border: none; width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 700; cursor: pointer; letter-spacing: 0.5px; }
     .btn:hover { opacity: 0.92; }
-    .opcion { display: block; width: 100%; text-align: left; background: #f9fafb; border: 1px solid #e5e7eb; padding: 14px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; font-size: 15px; }
+    .opcion { display: block; width: 100%; text-align: left; background: #f9fafb; border: 1px solid #e5e7eb; padding: 14px; border-radius: 10px; margin-bottom: 10px; cursor: pointer; font-size: 15px;color: #1f2937; }
     .opcion:hover { background: #e6f2ef; border-color: var(--primario); }
     .oculto { display: none; }
     .meta { font-size: 12px; color: #6b7280; margin-top: 16px; }
@@ -47,16 +47,47 @@
   <div id="contenedor-opciones"></div>
 </div>
 
-<div class="card oculto" id="pantalla-resultado">
-  <div class="icono">🎯</div>
-  <h1>Resultado Final</h1>
-  <div class="subtitulo" id="nota-final" style="font-size: 32px; margin: 16px 0;"></div>
-  <p class="desc" id="detalle-resultado"></p>
-  <button class="btn" onclick="location.reload()">HACER OTRO INTENTO (100 NUEVAS)</button>
-</div>
 
-<script>
-  const bancoPreguntas = [
+  <div class="card oculto" id="pantalla-resultado">
+    <div id="circulo-progreso" style="width: 145px; height: 145px; border-radius: 50%; margin: 10px auto 20px; display: flex; align-items: center; justify-content: center; background: #e5e7eb;">
+      <div style="width: 112px; height: 112px; border-radius: 50%; background: #ffffff; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+        <span id="nota-numero" style="font-size: 34px; font-weight: 800; color: #1f2937; line-height: 1;">0.0</span>
+        <span style="font-size: 13px; color: #6b7280; margin-top: 4px;">/ 10</span>
+      </div>
+    </div>
+
+    <h1 id="mensaje-final" style="margin-bottom: 18px;">¡Muy buen trabajo!</h1>
+
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 22px;">
+      <div style="background: #f3f4f6; padding: 12px 4px; border-radius: 10px;">
+        <div id="stat-total" style="font-size: 18px; font-weight: 800; color: #1f2937;">100</div>
+        <div style="font-size: 9px; font-weight: 700; color: #6b7280; margin-top: 4px;">PREGUNTAS</div>
+      </div>
+      <div style="background: #f3f4f6; padding: 12px 4px; border-radius: 10px;">
+        <div id="stat-correctas" style="font-size: 18px; font-weight: 800; color: #16a34a;">0</div>
+        <div style="font-size: 9px; font-weight: 700; color: #6b7280; margin-top: 4px;">CORRECTAS</div>
+      </div>
+      <div style="background: #f3f4f6; padding: 12px 4px; border-radius: 10px;">
+        <div id="stat-incorrectas" style="font-size: 18px; font-weight: 800; color: #dc2626;">0</div>
+        <div style="font-size: 9px; font-weight: 700; color: #6b7280; margin-top: 4px;">INCORRECTAS</div>
+      </div>
+      <div style="background: #f3f4f6; padding: 12px 4px; border-radius: 10px;">
+        <div id="stat-porcentaje" style="font-size: 18px; font-weight: 800; color: #1f2937;">0%</div>
+        <div style="font-size: 9px; font-weight: 700; color: #6b7280; margin-top: 4px;">ACIERTOS</div>
+      </div>
+    </div>
+
+    <button class="btn" onclick="iniciarExamen()">Realizar otro examen</button>
+    <div style="margin-top: 14px;">
+      <a href="#" onclick="location.reload(); return false;" style="color: #374151; text-decoration: none; font-size: 14px; font-weight: 600;">Volver al inicio</a>
+    </div>
+    <div class="meta" style="margin-top: 22px;">© Majano Corp. - 2026 All rights reserved.</div>
+  </div>
+
+  <script>
+    const bancoPreguntas = [
+
+
 
 { materia: "Química Clínica", pregunta: "¿Qué acción se indica en el inserto de SPINREACT para el método de colesterol (CHOD-POD) cuando la concentración de la muestra supera el límite de linealidad de 750 mg/dL?", correcta: "Diluir 1/2 con CINa 9 g/L y multiplicar el resultado final por 2", opciones: ["Diluir 1/2 con CINa 9 g/L y multiplicar el resultado final por 2", "Diluir 1/10 con agua destilada y dividir el resultado final entre 2", "Incubar 30 minutos a 37 °C y multiplicar por 0.0058", "Reconstituir el reactivo R2 en tampón TRIS y multiplicar por 4"] },
 { materia: "Química Clínica", pregunta: "¿Cuál es el rango de linealidad o límite superior de linealidad indicado para Glucosa (GOD-POD), Ácido Úrico (Uricasa-POD), Triglicéridos (GPO-POD) y Creatinina (Jaffe cinético) en los insertos SPINREACT del documento?", correcta: "Glucosa: 500 mg/dL; Ácido úrico: 25 mg/dL; Triglicéridos: 1200 mg/dL; Creatinina: 15 mg/dL", opciones: ["Glucosa: 500 mg/dL; Ácido úrico: 25 mg/dL; Triglicéridos: 1200 mg/dL; Creatinina: 15 mg/dL", "Glucosa: 1200 mg/dL; Ácido úrico: 500 mg/dL; Triglicéridos: 15 mg/dL; Creatinina: 25 mg/dL", "Glucosa: 250 mg/dL; Ácido úrico: 100 mg/dL; Triglicéridos: 500 mg/dL; Creatinina: 50 mg/dL", "Glucosa: 750 mg/dL; Ácido úrico: 15 mg/dL; Triglicéridos: 250 mg/dL; Creatinina: 100 mg/dL"] },
@@ -439,10 +470,27 @@
   function mostrarResultado() {
     document.getElementById("pantalla-quiz").classList.add("oculto");
     document.getElementById("pantalla-resultado").classList.remove("oculto");
-    const nota = ((aciertos / preguntasExamen.length) * 10).toFixed(1);
-    document.getElementById("nota-final").innerText = `Calificación: ${nota} / 10`;
-    document.getElementById("detalle-resultado").innerText = `Acertaste ${aciertos} de ${preguntasExamen.length} preguntas.`;
+
+    const total = preguntasExamen.length;
+    const incorrectas = total - aciertos;
+    const porcentaje = Math.round((aciertos / total) * 100);
+    const nota = ((aciertos / total) * 10).toFixed(1);
+    const grados = (porcentaje / 100) * 360;
+
+    document.getElementById("circulo-progreso").style.background = `conic-gradient(var(--primario) ${grados}deg, #e5e7eb ${grados}deg)`;
+    document.getElementById("nota-numero").innerText = nota;
+    document.getElementById("stat-total").innerText = total;
+    document.getElementById("stat-correctas").innerText = aciertos;
+    document.getElementById("stat-incorrectas").innerText = incorrectas;
+    document.getElementById("stat-porcentaje").innerText = `${porcentaje}%`;
+
+    let mensaje = "¡Sigue practicando!";
+    if (porcentaje >= 90) mensaje = "¡Excelente trabajo!";
+    else if (porcentaje >= 70) mensaje = "¡Muy buen trabajo!";
+    else if (porcentaje >= 60) mensaje = "¡Buen esfuerzo, sigue así!";
+    document.getElementById("mensaje-final").innerText = mensaje;
   }
+
 
       
     
