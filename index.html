@@ -409,22 +409,47 @@
   }
 
   function verificarRespuesta(seleccionada, correcta) {
+    const botones = document.querySelectorAll(".opcion");
+    botones.forEach(btn => {
+      btn.disabled = true;
+      if (btn.innerText === correcta) {
+        btn.style.backgroundColor = "#dcfce7";
+        btn.style.borderColor = "#16a34a";
+        btn.style.color = "#166534";
+        btn.style.fontWeight = "bold";
+      } else if (btn.innerText === seleccionada) {
+        btn.style.backgroundColor = "#fee2e2";
+        btn.style.borderColor = "#dc2626";
+        btn.style.color = "#991b1b";
+      }
+    });
+
     if (seleccionada === correcta) aciertos++;
-    indiceActual++;
-    if (indiceActual < preguntasExamen.length) {
-      mostrarPregunta();
-    } else {
-      mostrarResultado();
-    }
+
+    setTimeout(() => {
+      indiceActual++;
+      if (indiceActual < preguntasExamen.length) {
+        mostrarPregunta();
+      } else {
+        mostrarResultado();
+      }
+    }, 1500);
   }
 
   function mostrarResultado() {
     document.getElementById("pantalla-quiz").classList.add("oculto");
     document.getElementById("pantalla-resultado").classList.remove("oculto");
     const nota = ((aciertos / preguntasExamen.length) * 10).toFixed(1);
-    document.getElementById("nota-final").innerText = `${nota} / 10`;
-    document.getElementById("detalle-resultado").innerText = `Respondiste correctamente ${aciertos} de ${preguntasExamen.length} preguntas.`;
+    document.getElementById("nota-final").innerText = `Calificación: ${nota} / 10`;
+    document.getElementById("detalle-resultado").innerText = `Acertaste ${aciertos} de ${preguntasExamen.length} preguntas.`;
   }
+
+      
+    
+  
+
+
+  
 </script>
 </body>
 </html>
